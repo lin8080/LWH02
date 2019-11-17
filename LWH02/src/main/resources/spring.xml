@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+  	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+  xsi:schemaLocation="
+         	 http://www.springframework.org/schema/beans
+       	 	 http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+         	 http://www.springframework.org/schema/tx
+         	 http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+          	 http://www.springframework.org/schema/context
+          	 http://www.springframework.org/schema/context/spring-context-4.3.xsd
+          	 http://www.springframework.org/schema/mvc
+          	 http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+          	 http://www.springframework.org/schema/aop
+             http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+             
+			<!--
+			Spring的配置文件 ：主要配置和逻辑业务有关的，Spring整合mybatis，事务等
+			-->
+			
+			<!-- 开启注解扫描,扫描service包 -->
+			<context:component-scan base-package="com.lwh.service"/>
+
+			
+			<!-- 引入外部配置文件，加载数据库配置文件 -->
+			<context:property-placeholder  location="classpath:dbconfig.properties"/>
+			
+			
+			<!-- 数据源：创建连接池，事务控制 -->
+			<bean id="pooledDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+					<property name="jdbcUrl" value="${jdbc.url}"></property>
+					<property name="driverClass" value="${jdbc.driver}"></property>
+					<property name="user" value="${jdbc.username}"></property>
+					<property name="password" value="${jdbc.password}"></property>
+			</bean>
+			
+			
+			<!-- 配置Spring和Mybatis的整合，把SqlSessionFactory对象的创建交给Spring -->
+			<bean id="sqlSessionFactory"  class="org.mybatis.spring.SqlSessionFactoryBean">
+			
+				  <!-- 指定Mybatis全局配置文件的位置 -->
+			      <!-- 加载mybatis的配置文件 -->
+			      <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+			      <!-- 配置数据源 -->
+			      <property name="dataSource" ref="pooledDataSource"></property>
+			      <!-- 指定mybatis.mapper文件的位置 -->
+			      <property name="mapperLocations" value="classpath:mapper/*.xml"></property>
+			
+			</bean>
+			
+			<!-- 配置扫描器，将mybatis接口的实现加入到ioc容器中 -->
+      		<bean  class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+      		       <!-- 扫描所有dao接口的实现，加入到ioc容器 -->
+				  <property name="basePackage" value="com.lwh.dao"></property>
+			</bean>
+
+			<!-- Spring声明式事务管理配置：事务管理器 -->
+			<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+				  <!-- 控制数据源 -->
+				  <property name="dataSource" ref="pooledDataSource"></property>
+			</bean>
+			
+			<!-- 开启使用xml配置形式的事务 -->
+			<aop:config>
+			<!-- 切入点表达式 -->
+				<aop:pointcut expression="execution(* com.lwh.service.*.*(..))" id="txPoint"/>
+				<!-- 配置事务增强 -->
+				<aop:advisor advice-ref="txAdvice" pointcut-ref="txPoint"/>
+			
+			</aop:config>
+
+
+	        <!--事务通知规则,拦截到方法后对方法如何进行事务控制,在这里配置 -->
+            <!-- 配置事务增强，事务如何切入 -->
+			<tx:advice id="txAdvice"  transaction-manager="transactionManager">
+				<tx:attributes>
+					<!-- 所有方法都是事务方法 -->
+					<tx:method name="*"></tx:method>
+					<!--以get开头的所有方法-->
+					<tx:method name="get*" read-only="true"></tx:method>
+				</tx:attributes>
+			</tx:advice>
+
+
+			 <!-- 配置一个可以批量的执行sqlSession -->
+			 <bean  id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+			 		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"></constructor-arg>
+			 		<!-- 执行器类型，批量-batch -->
+					<constructor-arg name="executorType" value="BATCH"></constructor-arg>
+			
+			 </bean>
+			 
+
+</beans>

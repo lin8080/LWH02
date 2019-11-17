@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+  
+  <configuration>
+  		<!--
+  		开启自动驼峰命名规则（camel case）映射，
+  		即从经典数据库列名 A_COLUMN 到经典 Java 属性名 aColumn 的类似映射。
+  		省去mapper.xml文件中繁琐编写表字段列表与表实体类属性的映射关系，
+  		即resultMap的column，property字段对应
+  		 -->
+	<!--<settings>
+  			<setting name="mapUnderscoreToCamelCase" value="true" />
+  		</settings>-->
+  		
+  		<!--
+  		类型别名：自定义别名name为类所在的包路径，即可在
+  		-->
+	<!-- <typeAliases>-->
+	         <!--给指定的类名起别名，在接口映射配置文件中就可以直接使用别名，类名不区分大小写【不推荐使用，因为太麻烦了，要给每个类都起别名】-->
+	         <!--<typeAlias type="com.itheima.model.User" alias="user"></typeAlias>-->
+	         <!-- 给指定的包下所有类都起了别名，默认名字就是类名，类名不区分大小写-->
+    <!--  	 <package name="com.lwh.pojo"></package>-->
+    <!-- </typeAliases>&ndash;&gt;-->
+  		
+  		<!-- 
+  		
+  		分页的配置
+  		<plugins>
+    com.github.pagehelper为PageHelper类所在包名
+   				 <plugin interceptor="com.github.pagehelper.PageInterceptor">
+        调整分页合理化 
+      				<property name="reasonable" value="true"/>
+				</plugin>
+	</plugins>
+   -->
+  </configuration>
+
